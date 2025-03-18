@@ -24,20 +24,15 @@ jobs:
       - name: Instalar Dependências
         run: |
           pip install -r backend/tests/requirements.txt
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
 
       - name: Rodar Testes
         run: |
-          pip install pytest
           export TEST_MODE=True
           pytest backend/tests --disable-warnings
           
   deploy:
     runs-on: ubuntu-latest
-    needs: test
+    needs: build
     steps:
       - name: Conectar e fazer deploy no servidor
         uses: appleboy/ssh-action@v0.1.10
