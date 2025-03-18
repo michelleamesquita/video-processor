@@ -16,5 +16,5 @@ passlib[bcrypt]
 pika
 ffmpeg-python
 fastapi
-jwt
+PyJWT==2.6.0
 python-dotenv
