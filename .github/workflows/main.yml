@@ -24,6 +24,8 @@ jobs:
       - name: Instalar Dependências
         run: |
           pip install -r backend/tests/requirements.txt
+          pip install PyJWT==2.6.0
+
 
       - name: Rodar Testes
         run: |
