@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: "rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: "mysql:5.7"
+    container_name: "mysql_db"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: users
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # ✅ Volume persistente do MySQL
+      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  processador:
+    build: ./backend/microsservicos/processador
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend/microsservicos/processador:/app
+    working_dir: /app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+
+  usuario:
+    build: ./backend/microsservicos/usuario
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/microsservicos/usuario:/app
+    working_dir: /app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: "mysql+pymysql://admin:password@db:3306/users"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  filmes:
+    build: ./backend/microsservicos/filmes
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/microsservicos/filmes:/app
+    working_dir: /app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]
+    ports:
+      - "8003:8003"
+    environment:
+      DATABASE_URL: "mysql+pymysql://admin:password@db:3306/filmes"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8003/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  notificacoes:
+    build: ./backend/microsservicos/notificacoes
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend/microsservicos/notificacoes:/app
+    working_dir: /app
+    env_file:
+      - .env
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8004"]
+    ports:
+      - "8004:8004"
+  
+
+volumes:
+  mysql_data:

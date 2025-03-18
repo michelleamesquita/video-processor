@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+ffmpeg-python
+pika
+pydantic
+pytest
+sqlalchemy
+passlib[bcrypt]
+pymysql
+requests
+load_dotenv

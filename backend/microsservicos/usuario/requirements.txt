@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+ffmpeg-python
+pika
+pydantic
+pytest
+sqlalchemy
+passlib[bcrypt]
+pymysql
+requests
+PyJWT==2.6.0
+pytest-mock
+pydantic
