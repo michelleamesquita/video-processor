@@ -23,7 +23,7 @@ jobs:
           
       - name: Instalar Dependências
         run: |
-          pip install -r backend/requirements.txt
+          pip install -r backend/tests/requirements.txt
   test:
     runs-on: ubuntu-latest
     needs: build
