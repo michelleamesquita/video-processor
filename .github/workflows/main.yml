@@ -55,6 +55,6 @@ jobs:
               cd video-processor
             fi
             
-            # echo "Rodando docker-compose up..."
-            # docker-compose down
-            # docker-compose up -d --build
+            echo "Rodando docker-compose up..."
+            docker-compose down
+            docker-compose up -d --build
